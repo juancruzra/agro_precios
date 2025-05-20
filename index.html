@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Precios de granos - BCR</title>
+</head>
+<body>
+  <h1>Precios del día (BCR)</h1>
+  <ul id="lista-precios"></ul>
+
+  <script>
+    fetch('http://localhost:8000/precios')
+      .then(response => response.json())
+      .then(data => {
+        const lista = document.getElementById('lista-precios');
+        data.precios.forEach(item => {
+          const li = document.createElement('li');
+          li.textContent = `${item.producto}: ${item.precio}`;
+          lista.appendChild(li);
+        });
+      });
+  </script>
+</body>
+</html>
