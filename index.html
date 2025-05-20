@@ -5,19 +5,41 @@
   <title>Precios de granos - BCR</title>
 </head>
 <body>
-  <h1>Precios del día (BCR)</h1>
+  <h1>Precios del día (CAC BCR)</h1>
   <ul id="lista-precios"></ul>
 
   <script>
-    fetch('http://localhost:8000/precios')
+    const proxy = 'https://api.allorigins.win/get?url=';
+    const url = encodeURIComponent('https://www.cac.bcr.com.ar/es/precios-de-pizarra');
+
+    fetch(proxy + url)
       .then(response => response.json())
       .then(data => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(data.contents, 'text/html');
+        const tabla = doc.querySelector('table.table');
         const lista = document.getElementById('lista-precios');
-        data.precios.forEach(item => {
-          const li = document.createElement('li');
-          li.textContent = `${item.producto}: ${item.precio}`;
-          lista.appendChild(li);
-        });
+
+        if (tabla) {
+          const filas = tabla.querySelectorAll('tbody tr');
+          filas.forEach(fila => {
+            const celdas = fila.querySelectorAll('td');
+            if (celdas.length >= 3) {
+              const producto = celdas[0].textContent.trim();
+              const entrega = celdas[1].textContent.trim();
+              const precio = celdas[2].textContent.trim();
+              const li = document.createElement('li');
+              li.textContent = `${producto} (${entrega}): ${precio}`;
+              lista.appendChild(li);
+            }
+          });
+        } else {
+          lista.innerHTML = '<li>No se pudo encontrar la tabla de precios</li>';
+        }
+      })
+      .catch(error => {
+        console.error('Error al obtener precios:', error);
+        document.getElementById('lista-precios').innerHTML = '<li>Error al obtener precios</li>';
       });
   </script>
 </body>
