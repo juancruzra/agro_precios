@@ -10,16 +10,25 @@ def get_precios():
     response = requests.get(url)
     soup = BeautifulSoup(response.content, "html.parser")
 
-    tablas = soup.find_all("table")
+    # Busca la tabla con clase específica (puede cambiar si modifican el diseño)
+    tabla = soup.find("table", class_="table")
+
+    if not tabla:
+        return {"error": "No se encontró la tabla de precios"}
+
+    rows = tabla.find_all("tr")
     precios = []
 
-    for tabla in tablas:
-        rows = tabla.find_all("tr")
-        for row in rows[1:]:
-            cols = row.find_all("td")
-            if len(cols) > 1:
-                producto = cols[0].get_text(strip=True)
-                precio = cols[1].get_text(strip=True)
-                precios.append({"producto": producto, "precio": precio})
+    for row in rows[1:]:  # Ignoramos la cabecera
+        cols = row.find_all("td")
+        if len(cols) >= 3:
+            producto = cols[0].get_text(strip=True)
+            entrega = cols[1].get_text(strip=True)
+            precio = cols[2].get_text(strip=True)
+            precios.append({
+                "producto": producto,
+                "entrega": entrega,
+                "precio": precio
+            })
 
-    return {"precios": precios}
+    return {"fuente": url, "precios": precios}
