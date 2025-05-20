@@ -6,7 +6,7 @@ app = FastAPI()
 
 @app.get("/precios")
 def get_precios():
-    url = "https://www.bcr.com.ar/es/mercados/precios-del-dia"
+    url = "https://www.cac.bcr.com.ar/es/precios-de-pizarra"
     response = requests.get(url)
     soup = BeautifulSoup(response.content, "html.parser")
 
